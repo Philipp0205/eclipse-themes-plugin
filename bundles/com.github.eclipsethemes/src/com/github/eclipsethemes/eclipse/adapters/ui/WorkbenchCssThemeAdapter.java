@@ -6,10 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
-import java.util.stream.Collectors;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.e4.ui.css.swt.theme.ITheme;
@@ -77,88 +75,31 @@ public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 		IThemeEngine displayEngine = display == null ? null
 				: (IThemeEngine) display.getData(DISPLAY_ENGINE_KEY);
 		IThemeEngine engine = displayEngine != null ? displayEngine : serviceEngine;
-
-		String cssUri = cssFile.toUri().toString();
-		String targetTheme = theme.getType() == ThemeType.DARK ? DARK_THEME_ID : LIGHT_THEME_ID;
-		String activeBefore = engine == null || engine.getActiveTheme() == null ? "null"
-				: engine.getActiveTheme().getId();
-		boolean cssExists = Files.isRegularFile(cssFile);
-		List<String> themeIds = engine == null ? List.of()
-				: engine.getThemes().stream().map(ITheme::getId).collect(Collectors.toList());
-		// #region agent log
-		try {
-			java.util.HashMap<String, Object> data = new java.util.HashMap<>();
-			data.put("engineNull", engine == null);
-			data.put("serviceEngineNull", serviceEngine == null);
-			data.put("displayEngineNull", displayEngine == null);
-			data.put("sameEngine", serviceEngine == displayEngine);
-			data.put("themeType", String.valueOf(theme.getType()));
-			data.put("targetTheme", targetTheme);
-			data.put("activeBefore", activeBefore);
-			data.put("themeCount", themeIds.size());
-			data.put("themeIds", themeIds.toString());
-			data.put("cssExists", cssExists);
-			data.put("cssBytes", cssExists ? Files.size(cssFile) : -1L);
-			data.put("runId", "post-fix");
-			Files.writeString(Path.of("/opt/cursor/logs/debug.log"),
-					DbgNdjson.line("C", "WorkbenchCssThemeAdapter.applyCss", "engine_lookup", data),
-					java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-		} catch (Exception ignored) {
-		}
-		// #endregion
 		if (engine == null) {
 			return;
 		}
 
-		boolean newlyRegistered = false;
+		String cssUri = cssFile.toUri().toString();
+		String targetTheme = theme.getType() == ThemeType.DARK ? DARK_THEME_ID : LIGHT_THEME_ID;
+
 		boolean hasPlatformThemes = !engine.getThemes().isEmpty();
 		if (hasPlatformThemes) {
 			synchronized (REGISTERED_ENGINES) {
-				newlyRegistered = REGISTERED_ENGINES.add(engine);
-				if (newlyRegistered) {
+				if (REGISTERED_ENGINES.add(engine)) {
 					engine.registerStylesheet(cssUri);
 				}
 			}
 		}
 
-		// #region agent log
-		try {
-			Files.writeString(Path.of("/opt/cursor/logs/debug.log"),
-					DbgNdjson.line("D", "WorkbenchCssThemeAdapter.applyCss", "before_setTheme",
-							java.util.Map.of(
-									"newlyRegistered", newlyRegistered,
-									"targetTheme", targetTheme,
-									"activeBefore", activeBefore,
-									"runId", "post-fix")),
-					java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-		} catch (Exception ignored) {
-		}
-		// #endregion
-
-		String appliedVia = activateTheme(engine, theme, targetTheme, cssUri);
+		activateTheme(engine, theme, targetTheme, cssUri);
 		forceReapply(engine);
 		applyToShells(display, engine);
-
-		String activeAfter = engine.getActiveTheme() == null ? "null" : engine.getActiveTheme().getId();
-		// #region agent log
-		try {
-			Files.writeString(Path.of("/opt/cursor/logs/debug.log"),
-					DbgNdjson.line("D", "WorkbenchCssThemeAdapter.applyCss", "after_setTheme",
-							java.util.Map.of(
-									"activeAfter", activeAfter,
-									"changed", !activeBefore.equals(activeAfter),
-									"appliedVia", appliedVia,
-									"runId", "post-fix")),
-					java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
-		} catch (Exception ignored) {
-		}
-		// #endregion
 	}
 
-	private static String activateTheme(IThemeEngine engine, Theme theme, String targetTheme, String cssUri) {
+	private static void activateTheme(IThemeEngine engine, Theme theme, String targetTheme, String cssUri) {
 		engine.setTheme(targetTheme, true);
 		if (engine.getActiveTheme() != null) {
-			return "platform:" + engine.getActiveTheme().getId();
+			return;
 		}
 
 		String needle = theme.getType() == ThemeType.DARK ? "dark" : "default";
@@ -166,7 +107,7 @@ public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 			if (candidate.getId().toLowerCase().contains(needle)) {
 				engine.setTheme(candidate, true);
 				if (engine.getActiveTheme() != null) {
-					return "matched:" + candidate.getId();
+					return;
 				}
 			}
 		}
@@ -180,7 +121,6 @@ public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 			engine.registerTheme(generatedId, "Eclipse Themes Generated", cssUri);
 		}
 		engine.setTheme(generatedId, true);
-		return engine.getActiveTheme() == null ? "generated-failed" : "generated:" + generatedId;
 	}
 
 	private static void forceReapply(IThemeEngine engine) {

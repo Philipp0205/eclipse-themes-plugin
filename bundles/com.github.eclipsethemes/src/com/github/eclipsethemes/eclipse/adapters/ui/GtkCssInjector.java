@@ -38,23 +38,14 @@ final class GtkCssInjector {
 		try {
 			byte[] data = (css + '\0').getBytes(StandardCharsets.UTF_8);
 			Class<?> gtk = loadClassWithMethod("gtk_css_provider_new");
-			// #region agent log
-			try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("A","GtkCssInjector.apply","provider_new_class", java.util.Map.of("gtkClass", gtk.getName(), "cssLen", css.length(), "availableGtk", loadAvailableGtkClasses().stream().map(Class::getName).toList().toString(), "loadOnProviderClass", Arrays.stream(gtk.getMethods()).anyMatch(m -> "gtk_css_provider_load_from_data".equals(m.getName())), "loadOnAnyGtk", loadAvailableGtkClasses().stream().anyMatch(c -> Arrays.stream(c.getMethods()).anyMatch(m -> "gtk_css_provider_load_from_data".equals(m.getName()))), "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
-			// #endregion
 			long provider = ((Number) invoke(gtk, "gtk_css_provider_new")).longValue();
 			boolean loaded = loadCss(gtk, provider, data);
-			// #region agent log
-			try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("A","GtkCssInjector.apply","loadCss_result", java.util.Map.of("provider", provider, "loaded", loaded, "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
-			// #endregion
 			if (provider == 0 || !loaded) {
 				throw new IllegalStateException("GTK rejected the generated stylesheet");
 			}
 
 			int priority = readInt(gtk, "GTK_STYLE_PROVIDER_PRIORITY_USER", 800);
 			boolean globallyApplied = applyGlobally(provider, priority);
-			// #region agent log
-			try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("B","GtkCssInjector.apply","applyGlobally_result", java.util.Map.of("globallyApplied", globallyApplied, "priority", priority, "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
-			// #endregion
 			if (!globallyApplied) {
 				currentProvider = provider;
 				installShowListener(display, log);
@@ -62,9 +53,6 @@ final class GtkCssInjector {
 			}
 			return true;
 		} catch (ReflectiveOperationException | RuntimeException | LinkageError e) {
-			// #region agent log
-			try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("A","GtkCssInjector.apply","apply_exception", java.util.Map.of("type", e.getClass().getName(), "message", String.valueOf(e.getMessage()), "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
-			// #endregion
 			log.warn("Could not inject GTK CSS; Eclipse CSS will remain active", e);
 			return false;
 		}
@@ -92,16 +80,12 @@ final class GtkCssInjector {
 			searchOrder.add(providerGtk);
 		}
 
-		int candidates = 0;
-		List<String> searched = new ArrayList<>();
 		for (Class<?> type : searchOrder) {
-			searched.add(type.getName());
 			for (Method method : type.getMethods()) {
 				if (!method.getName().equals("gtk_css_provider_load_from_data")
 						|| !Modifier.isStatic(method.getModifiers())) {
 					continue;
 				}
-				candidates++;
 				Object result;
 				// SWT passes -1 so GTK treats the buffer as NUL-terminated.
 				if (method.getParameterCount() == 4) {
@@ -112,15 +96,9 @@ final class GtkCssInjector {
 				} else {
 					continue;
 				}
-				// #region agent log
-				try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("B","GtkCssInjector.loadCss","invoked_load", java.util.Map.of("declaringClass", method.getDeclaringClass().getName(), "paramCount", method.getParameterCount(), "result", String.valueOf(result), "returnType", method.getReturnType().getName(), "gtk4", gtk4, "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
-				// #endregion
 				return !(result instanceof Boolean success) || success;
 			}
 		}
-		// #region agent log
-		try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("A","GtkCssInjector.loadCss","no_method_on_class", java.util.Map.of("searchedClass", providerGtk.getName(), "searchedClasses", searched.toString(), "candidates", candidates, "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
-		// #endregion
 		return false;
 	}
 
