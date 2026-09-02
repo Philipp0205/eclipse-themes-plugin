@@ -21,6 +21,13 @@
 				<version>${tycho.version}</version>
 				<configuration>
 					<providerHint>junit5</providerHint>
+					<dependencies>
+						<!-- Provides e4_dark / e4_default CSS themes for workbench styling -->
+						<dependency>
+							<artifactId>org.eclipse.ui.themes</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+					</dependencies>
 				</configuration>
 			</plugin>
 		</plugins>

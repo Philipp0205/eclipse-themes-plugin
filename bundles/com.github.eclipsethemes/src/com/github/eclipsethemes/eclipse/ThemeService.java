@@ -21,9 +21,16 @@ public final class ThemeService {
 	}
 
 	public void applyTheme(IWorkbench workbench, Theme theme) {
+		// #region agent log
+		try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), com.github.eclipsethemes.eclipse.adapters.ui.DbgNdjson.line("E","ThemeService.applyTheme","start", java.util.Map.of("themeId", theme.getId(), "themeType", String.valueOf(theme.getType()), "adapterCount", registry.getAdapters().size(), "workbenchNull", workbench == null)), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
+		// #endregion
 		registry.getAdapters().forEach((adapter, plugin) -> {
 			// If a required plugin is declared, skip when it is not installed
-			if (plugin != null && Platform.getBundle(plugin) == null) return;
+			boolean skipped = plugin != null && Platform.getBundle(plugin) == null;
+			// #region agent log
+			try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), com.github.eclipsethemes.eclipse.adapters.ui.DbgNdjson.line("E","ThemeService.applyTheme","adapter", java.util.Map.of("adapter", adapter.getClass().getSimpleName(), "plugin", String.valueOf(plugin), "skipped", skipped)), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
+			// #endregion
+			if (skipped) return;
 
 			try {
 				String prefNodeId = adapter.getPreferencesId();

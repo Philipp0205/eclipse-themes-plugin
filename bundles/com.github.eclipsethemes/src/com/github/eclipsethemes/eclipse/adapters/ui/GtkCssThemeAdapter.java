@@ -50,6 +50,9 @@ public final class GtkCssThemeAdapter extends EclipseThemeAdapter {
 
 		Display display = workbench.getDisplay();
 		Runnable inject = () -> {
+			// #region agent log
+			try { java.nio.file.Files.writeString(java.nio.file.Path.of("/opt/cursor/logs/debug.log"), DbgNdjson.line("A","GtkCssThemeAdapter.applyWorkbench","inject_start", java.util.Map.of("cssFile", cssFile.toString(), "cssChars", css.length(), "ws", String.valueOf(Platform.getWS()), "runId", "post-fix")), java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND); } catch (Exception ignored) {}
+			// #endregion
 			if (!GtkCssInjector.apply(display, css, EclipseThemes.instance().getLogger())) {
 				EclipseThemes.instance().getLogger()
 						.info("Generated GTK stylesheet is available at " + cssFile);
