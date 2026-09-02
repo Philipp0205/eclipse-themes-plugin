@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -244,13 +245,25 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 				.setText("Select a theme from the list to see how it looks with Java code syntax highlighting.");
 		instructionLabel.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 
-		browserPreview = new Browser(previewGroup, SWT.BORDER);
 		GridData browserData = new GridData(SWT.FILL, SWT.FILL, true, true);
 		browserData.heightHint = 300;
 		browserData.minimumHeight = 200;
-		browserPreview.setLayoutData(browserData);
+		try {
+			browserPreview = new Browser(previewGroup, SWT.BORDER);
+			browserPreview.setLayoutData(browserData);
+			showDefaultPreview();
+		} catch (SWTError e) {
+			browserPreview = null;
+			previewVisible = false;
+			previewToggleButton.setSelection(false);
+			previewToggleButton.setEnabled(false);
 
-		showDefaultPreview();
+			Label unavailable = new Label(previewGroup, SWT.WRAP | SWT.CENTER);
+			unavailable.setText("Live preview is unavailable because this system has no compatible WebKit browser. "
+					+ "Themes can still be selected and applied.");
+			unavailable.setLayoutData(browserData);
+			EclipseThemes.instance().getLogger().warn("Live theme preview is unavailable", e);
+		}
 	}
 
 	private void createActionButtons(Composite parent) {
@@ -502,7 +515,7 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	}
 
 	private void updatePreview(Theme theme) {
-		if (!previewVisible) {
+		if (!previewVisible || browserPreview == null || browserPreview.isDisposed()) {
 			return;
 		}
 
@@ -515,12 +528,18 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	}
 
 	private void showDefaultPreview() {
+		if (browserPreview == null || browserPreview.isDisposed()) {
+			return;
+		}
 		// TODO: We might do offline theme preview generation
 		browserPreview.setText("<html><body style='background:#f5f5f5;padding:20px;font-family:Arial;'>"
 				+ "<h3>Theme Preview</h3>" + "<p>Select a theme to see the preview here.</p></body></html>");
 	}
 
 	private void showPreviewError(String message) {
+		if (browserPreview == null || browserPreview.isDisposed()) {
+			return;
+		}
 		browserPreview.setText("<html><body style='background:#f5f5f5;padding:20px;font-family:Arial;color:#cc0000;'>"
 				+ "<h3>Preview Error</h3>" + "<p>" + message + "</p></body></html>");
 	}
