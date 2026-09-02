@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Eclipse Themes Tests
 Bundle-SymbolicName: com.github.eclipsethemes.tests
 Bundle-Version: 1.1.0.qualifier
-Require-Bundle: com.github.eclipsethemes,
- junit-jupiter-api
+Fragment-Host: com.github.eclipsethemes
+Require-Bundle: junit-jupiter-api
 Bundle-RequiredExecutionEnvironment: JavaSE-17
 Automatic-Module-Name: com.github.eclipsethemes.tests
