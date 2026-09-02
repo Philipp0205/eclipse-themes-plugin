@@ -6,7 +6,8 @@
 ![Eclipse Marketplace Downloads](https://img.shields.io/eclipse-marketplace/dt/eclipse-themes)
 
 
-A simple plugin for finding and applying editor color themes in the Eclipse IDE.
+A plugin for finding and applying color themes across Eclipse editors and the
+surrounding workbench.
 
 This project started when the original `eclipsecolorthemes.org` website went offline. To help the community, I built a new, modern, open-source alternative: **[eclipse-color-themes.vercel.app](https://eclipse-color-themes.vercel.app/)**.
 
@@ -19,6 +20,8 @@ I then realized the old plugin was also outdated, so I decided to build this one
 - A clean preference page with a **live preview** for your code.
 - **Import support** for your own favorite `.xml` theme files.
 - Syntax highlighting support for Java, C++, XML, and more via an adapter system.
+- Optional whole-workbench styling for views, tabs, toolbars, trees, and tables.
+- An application-only GTK overlay on Linux for native backgrounds and selections.
 
 ## 📸 Screenshots
 
@@ -44,7 +47,16 @@ I then realized the old plugin was also outdated, so I decided to build this one
 1.  Go to `Window -> Preferences` (or `Eclipse -> Settings...` on macOS).
 2.  Navigate to `General -> Appearance -> Eclipse Themes`.
 3.  Pick a theme from the list to see how it looks.
-4.  Click **Apply and Close** to set your new editor theme.
+4.  Leave **Apply theme to the whole Eclipse workbench** selected to also style the IDE chrome.
+5.  Click **Apply and Close** to set your new theme.
+
+### Platform styling limits
+
+Eclipse workbench controls use E4 CSS while some controls are drawn by the
+platform toolkit. On Linux the plugin injects GTK CSS into Eclipse only; it does
+not change your desktop GTK theme or other applications. Window decorations,
+some GTK/Adwaita widgets, native controls on Windows and macOS, and third-party
+views that hard-code colors may retain their platform colors.
 
 ## ☕ Support
 

@@ -38,6 +38,10 @@ public final class ThemeManager {
 		service.applyTheme(workbench, theme);
 	}
 
+	public void restoreActiveTheme(IWorkbench workbench, String themeId) {
+		repository.findById(themeId).ifPresent(theme -> service.applyTheme(workbench, theme));
+	}
+
 	public Optional<Theme> importTheme(File file) {
 		return repository.importTheme(file);
 	}

@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 import java.util.Optional;
 
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.dialogs.Dialog;
@@ -59,6 +60,7 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	private Button importButton;
 	private Button removeButton;
 	private Button previewToggleButton;
+	private Button applyWorkbenchThemeButton;
 	private Label statusLabel;
 
 	// Data
@@ -67,6 +69,7 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	private Theme selectedTheme;
 	private Theme currentTheme;
 	private boolean previewVisible = true;
+	private boolean initialApplyWorkbenchTheme;
 
 	public EclipseThemesPreferencePage() {
 		ScopedPreferenceStore scopedPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE,
@@ -89,6 +92,8 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		createToolbar(container);
 		// Themes List and Theme Details, Preview browser
 		createMainArea(container);
+		// Workbench and native widget styling
+		createWorkbenchOptions(container);
 		// Import, Remove
 		createActionButtons(container);
 
@@ -99,6 +104,25 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		addListeners();
 
 		return container;
+	}
+
+	private void createWorkbenchOptions(Composite parent) {
+		Group options = new Group(parent, SWT.NONE);
+		options.setText("Eclipse UI");
+		options.setLayout(new GridLayout(1, false));
+		options.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+
+		applyWorkbenchThemeButton = new Button(options, SWT.CHECK);
+		applyWorkbenchThemeButton.setText("Apply theme to the whole Eclipse workbench");
+		applyWorkbenchThemeButton.setToolTipText(
+				"Styles views, tabs, toolbars, trees and tables in addition to editors");
+
+		if (Platform.WS_GTK.equals(Platform.getWS())) {
+			Label gtkNote = new Label(options, SWT.WRAP);
+			gtkNote.setText(
+					"Linux: Eclipse CSS is combined with an application-only GTK overlay for native backgrounds and selections.");
+			gtkNote.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		}
 	}
 
 	private void createToolbar(Composite parent) {
@@ -293,6 +317,9 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 
 		String activeThemeId = getPreferenceStore().getString(PreferenceKeys.ACTIVE_THEME_ID);
 		this.currentTheme = findThemeById(activeThemeId).orElse(null);
+		this.initialApplyWorkbenchTheme = getPreferenceStore()
+				.getBoolean(PreferenceKeys.APPLY_WORKBENCH_THEME);
+		applyWorkbenchThemeButton.setSelection(initialApplyWorkbenchTheme);
 
 		refreshThemeList();
 		selectInitialTheme();
@@ -521,9 +548,12 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 
 		try {
 			getPreferenceStore().setValue(PreferenceKeys.ACTIVE_THEME_ID, selectedTheme.getId());
+			getPreferenceStore().setValue(PreferenceKeys.APPLY_WORKBENCH_THEME,
+					applyWorkbenchThemeButton.getSelection());
 			EclipseThemes.instance().getManager().applyTheme(workbench, selectedTheme);
 
 			currentTheme = selectedTheme;
+			initialApplyWorkbenchTheme = applyWorkbenchThemeButton.getSelection();
 			updateButtonStates();
 			refreshThemeList(); // to update "●" indicator
 
@@ -689,7 +719,9 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 
 	@Override
 	public boolean performOk() {
-		if (selectedTheme != null && !selectedTheme.equals(currentTheme)) {
+		boolean workbenchPreferenceChanged =
+				applyWorkbenchThemeButton.getSelection() != initialApplyWorkbenchTheme;
+		if (selectedTheme != null && (!selectedTheme.equals(currentTheme) || workbenchPreferenceChanged)) {
 			applySelectedTheme();
 		}
 		return super.performOk();
@@ -710,6 +742,8 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	}
 
 	private void resetToPluginDefault() {
+		applyWorkbenchThemeButton.setSelection(true);
+		getPreferenceStore().setValue(PreferenceKeys.APPLY_WORKBENCH_THEME, true);
 		Theme defaultTheme = getDefaultThemeForCurrentMode();
 		if (defaultTheme != null) {
 			getPreferenceStore().setValue(PreferenceKeys.ACTIVE_THEME_ID, defaultTheme.getId());
@@ -740,6 +774,9 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 			}
 		}
 		getPreferenceStore().setToDefault(PreferenceKeys.ACTIVE_THEME_ID);
+		getPreferenceStore().setValue(PreferenceKeys.APPLY_WORKBENCH_THEME, false);
+		applyWorkbenchThemeButton.setSelection(false);
+		initialApplyWorkbenchTheme = false;
 		currentTheme = null;
 		refreshThemeList();
 		clearSelection();

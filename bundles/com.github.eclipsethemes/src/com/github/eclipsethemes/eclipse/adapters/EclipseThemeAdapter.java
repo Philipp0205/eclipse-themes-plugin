@@ -1,6 +1,7 @@
 package com.github.eclipsethemes.eclipse.adapters;
 
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.ui.IWorkbench;
 import org.osgi.service.prefs.BackingStoreException;
 
 import com.github.eclipsethemes.core.models.Color;
@@ -22,6 +23,15 @@ public abstract class EclipseThemeAdapter {
 	 * Apply theme to Eclipse preferences.
 	 */
 	public abstract void apply(Theme theme, IEclipsePreferences preferences) throws BackingStoreException;
+
+	/**
+	 * Applies workbench-level styling. Preference-only adapters can keep using
+	 * {@link #apply(Theme, IEclipsePreferences)}.
+	 */
+	public void applyWorkbench(Theme theme, IEclipsePreferences preferences, IWorkbench workbench)
+			throws BackingStoreException {
+		apply(theme, preferences);
+	}
 
 	// === SEMANTIC STYLE PREFERENCES (using dots) ===
 
