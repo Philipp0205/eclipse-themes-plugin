@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -156,13 +157,15 @@ final class GtkCssInjector {
 	}
 
 	private static List<Class<?>> loadAvailableGtkClasses() {
-		return GTK_CLASSES.stream().map(name -> {
+		List<Class<?>> available = new ArrayList<>();
+		for (String name : GTK_CLASSES) {
 			try {
-				return Class.forName(name);
+				available.add(Class.forName(name));
 			} catch (ClassNotFoundException | LinkageError e) {
-				return null;
+				// SWT exposes different PI classes for GTK3 and GTK4 releases.
 			}
-		}).filter(java.util.Objects::nonNull).toList();
+		}
+		return available;
 	}
 
 	private static Object invoke(Class<?> type, String name, Object... arguments) throws ReflectiveOperationException {
