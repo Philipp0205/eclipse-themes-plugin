@@ -1,0 +1,4 @@
+{
+  "name": "Eclipse Themes",
+  "install": "bash .cursor/install.sh"
+}
