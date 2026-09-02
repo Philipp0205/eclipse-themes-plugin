@@ -1,6 +1,8 @@
 package com.github.eclipsethemes.eclipse.adapters.ui;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 import org.junit.jupiter.api.Test;
 
@@ -9,6 +11,7 @@ import com.github.eclipsethemes.core.models.Theme;
 import com.github.eclipsethemes.core.models.ThemeType;
 import com.github.eclipsethemes.core.models.Token;
 import com.github.eclipsethemes.core.models.TokenKey;
+import com.github.eclipsethemes.core.parser.mapper.LegacyEclipsePropertyMapper;
 
 class CssGeneratorTest {
 
@@ -31,6 +34,14 @@ class CssGeneratorTest {
 		assertTrue(css.contains("@define-color theme_selected_bg_color #3d4149;"));
 		assertTrue(css.contains("@define-color theme_selected_fg_color #adbac7;"));
 		assertTrue(css.contains("*:selected"));
+	}
+
+	@Test
+	void sourceHoverDoesNotOverwriteSelectionBackground() {
+		String mapped = LegacyEclipsePropertyMapper.mapProperty("sourceHoverBackground");
+
+		assertEquals(TokenKey.SOURCE_HOVER_BACKGROUND.getName(), mapped);
+		assertNotEquals(TokenKey.SELECTION_BACKGROUND, TokenKey.byId(mapped));
 	}
 
 	private static Theme darkDimmed() {

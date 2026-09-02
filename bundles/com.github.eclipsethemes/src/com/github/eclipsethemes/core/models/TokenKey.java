@@ -31,6 +31,7 @@ public final class TokenKey {
 	    SELECTION_BACKGROUND        = register("selectionBackground", BACKGROUND),
 	    SELECTION_FOREGROUND        = register("selectionForeground", FOREGROUND),
 	    CURRENT_LINE                = register("currentLine", BACKGROUND),
+	    SOURCE_HOVER_BACKGROUND     = register("sourceHoverBackground", BACKGROUND),
 	    ERROR                       = register("error", FOREGROUND),
 	    OCCURRENCE                  = register("occurrence", CURRENT_LINE),
 	    WRITE_OCCURRENCE            = register("writeOccurrence", OCCURRENCE),
