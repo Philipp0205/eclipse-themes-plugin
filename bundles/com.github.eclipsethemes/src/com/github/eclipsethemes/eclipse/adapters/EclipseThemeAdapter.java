@@ -33,6 +33,17 @@ public abstract class EclipseThemeAdapter {
 		apply(theme, preferences);
 	}
 
+	/**
+	 * Adapters are applied in ascending order. Workbench styling has to come
+	 * first: Eclipse's base stylesheet carries an
+	 * {@code IEclipsePreferences#org-eclipse-ui-editors} rule that rewrites the
+	 * editor colors whenever the CSS theme changes, so it must not run after the
+	 * editor adapters have stored the ones from the color theme.
+	 */
+	public int getOrder() {
+		return 0;
+	}
+
 	// === SEMANTIC STYLE PREFERENCES (using dots) ===
 
 	protected static void putSemanticStyle(IEclipsePreferences preferences, String baseName, Token token) {

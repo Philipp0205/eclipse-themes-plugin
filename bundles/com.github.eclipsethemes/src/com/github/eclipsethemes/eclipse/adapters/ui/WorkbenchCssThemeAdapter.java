@@ -25,6 +25,9 @@ import com.github.eclipsethemes.eclipse.preferences.PreferenceKeys;
 
 public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 
+	/** Runs before the preference adapters. See {@link EclipseThemeAdapter#getOrder()}. */
+	static final int WORKBENCH_ORDER = -100;
+
 	static final String DARK_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_dark";
 	static final String LIGHT_THEME_ID = "org.eclipse.e4.ui.css.theme.e4_default";
 	private static final String GENERATED_THEME_PREFIX = "com.github.eclipsethemes.generated.";
@@ -36,6 +39,11 @@ public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 	@Override
 	public String getPreferencesId() {
 		return EclipseThemes.PLUGIN_ID;
+	}
+
+	@Override
+	public int getOrder() {
+		return WORKBENCH_ORDER;
 	}
 
 	@Override

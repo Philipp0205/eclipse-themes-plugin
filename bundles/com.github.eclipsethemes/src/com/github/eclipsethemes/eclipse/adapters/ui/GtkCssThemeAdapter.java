@@ -24,6 +24,11 @@ public final class GtkCssThemeAdapter extends EclipseThemeAdapter {
 	}
 
 	@Override
+	public int getOrder() {
+		return WorkbenchCssThemeAdapter.WORKBENCH_ORDER;
+	}
+
+	@Override
 	public void apply(Theme theme, IEclipsePreferences preferences) {
 		// Native GTK styling needs the workbench Display supplied by applyWorkbench.
 	}
