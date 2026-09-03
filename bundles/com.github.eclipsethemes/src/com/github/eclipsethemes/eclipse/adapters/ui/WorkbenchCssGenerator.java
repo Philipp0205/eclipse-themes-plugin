@@ -134,6 +134,22 @@ public final class WorkbenchCssGenerator {
 			}
 			.MTrimBar#org-eclipse-ui-main-toolbar { background-color: ${chrome}; }
 
+			/* ===== Push buttons =====
+			 * SWT paints the inside of a GTK button from the color set here while the
+			 * GTK overlay paints the button frame, so both have to name the same
+			 * surface or the button ends up framed in a contrasting color. Check
+			 * boxes and radio buttons stay on the surrounding background, which is
+			 * why this is restricted to push and toggle buttons.
+			 */
+			Button[style~='SWT.PUSH'],
+			Button[style~='SWT.TOGGLE'],
+			.MPart Button[style~='SWT.PUSH'],
+			.MPart Button[style~='SWT.TOGGLE'],
+			.View Button[style~='SWT.TOGGLE'] {
+			    background-color: ${elevated};
+			    color: ${foreground};
+			}
+
 			/* ===== Editable controls ===== */
 			Combo, CCombo, Text, Spinner, DateTime {
 			    background-color: ${input};
@@ -493,7 +509,7 @@ public final class WorkbenchCssGenerator {
 			    color: ${foreground};
 			}
 			.View Button[style~='SWT.PUSH'] {
-			    background-color: ${chrome};
+			    background-color: ${elevated};
 			    color: ${foreground};
 			}
 			.View Hyperlink {

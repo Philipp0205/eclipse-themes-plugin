@@ -57,9 +57,19 @@ public final class GtkCssGenerator {
 			@define-color borders ${border};
 			@define-color insensitive_fg_color ${disabled};
 
-			window, dialog, box, paned, grid, viewport, scrolledwindow, .background {
+			window, dialog, .background {
 			    background-color: ${background};
 			    color: ${foreground};
+			}
+
+			/* GTK containers must stay transparent. Painting them would also paint
+			 * the box and label nodes GTK nests inside buttons and combos, which
+			 * shows up as a differently colored rectangle inside the control. SWT
+			 * paints its own composites from the Eclipse stylesheet anyway.
+			 */
+			box, paned, grid, viewport, scrolledwindow, stack, overlay,
+			button box, button label, button image {
+			    background-color: transparent;
 			}
 
 			label, image {
@@ -87,31 +97,41 @@ public final class GtkCssGenerator {
 			}
 
 			/* Push buttons sit slightly above the surface. Using the darker chrome
-			 * color here makes them read as holes punched into the dialog.
+			 * color here makes them read as holes punched into the dialog. The
+			 * border matches the fill and the GTK shadows are dropped, otherwise
+			 * the desktop theme outlines every button in a contrasting color.
 			 */
 			button {
 			    background-color: ${elevated};
 			    background-image: none;
 			    color: ${foreground};
-			    border-color: ${border};
+			    border-color: ${elevated};
+			    box-shadow: none;
+			    text-shadow: none;
 			}
 
 			button:hover {
 			    background-color: ${hover};
 			    background-image: none;
 			    color: ${foreground};
+			    border-color: ${hover};
+			    box-shadow: none;
 			}
 
 			button:active, button:checked {
 			    background-color: ${selectionBackground};
 			    background-image: none;
 			    color: ${selectionForeground};
+			    border-color: ${selectionBackground};
+			    box-shadow: none;
 			}
 
 			button:disabled {
 			    background-color: ${background};
 			    background-image: none;
 			    color: ${disabled};
+			    border-color: ${background};
+			    box-shadow: none;
 			}
 
 			button:focus {
@@ -125,6 +145,7 @@ public final class GtkCssGenerator {
 			    background-color: transparent;
 			    background-image: none;
 			    border-color: transparent;
+			    box-shadow: none;
 			}
 
 			toolbar button:hover, toolbar togglebutton:hover, headerbar button:hover,
