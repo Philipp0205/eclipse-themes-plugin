@@ -7,6 +7,7 @@ on:
     branches: [main]
   release:
     types: [created]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -44,20 +45,42 @@ jobs:
   deploy-updatesite:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.event_name == 'release'
+    if: github.event_name == 'release' || (github.event_name != 'pull_request' && github.ref == 'refs/heads/main')
+    concurrency:
+      group: updatesite-deploy
+      cancel-in-progress: false
     steps:
-      - name: Download build artifacts
+      - name: Get site extras
+        uses: actions/checkout@v5
+        with:
+          sparse-checkout: releng/com.github.eclipsethemes.updatesite/site-root
+          sparse-checkout-cone-mode: true
+
+      - name: Download p2 repository
         uses: actions/download-artifact@v4
         with:
           name: eclipse-themes-updatesite
           path: updatesite/
 
-      - name: Deploy to GitHub Pages
+      - name: Add GitHub Pages files
+        run: |
+          test -f updatesite/p2.index
+          test -d updatesite/plugins
+          test -d updatesite/features
+          cp -a releng/com.github.eclipsethemes.updatesite/site-root/. updatesite/
+          test -f updatesite/index.html
+          test -f updatesite/.nojekyll
+
+      - name: Publish p2 repository to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./updatesite
           publish_branch: gh-pages
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: "Publish p2 update site ${{ github.sha }}"
 
   create-release:
     needs: build

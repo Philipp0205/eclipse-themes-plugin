@@ -43,6 +43,8 @@ I then realized the old plugin was also outdated, so I decided to build this one
 2.  Click **Add...** and enter the URL: `https://ahatem.github.io/eclipse-themes-plugin/`
 3.  Give it a name (like `Eclipse Themes`) and complete the installation.
 
+Every push to `main` rebuilds this p2 repository and publishes it to GitHub Pages.
+
 ### From a locally built update site
 
 Useful for trying out an unreleased branch.
