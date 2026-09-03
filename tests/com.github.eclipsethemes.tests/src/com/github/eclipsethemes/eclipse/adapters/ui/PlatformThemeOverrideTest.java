@@ -93,6 +93,53 @@ class PlatformThemeOverrideTest {
 				+ String.join("\n", missing));
 	}
 
+	/**
+	 * Eclipse releases after the 2024-09 build target moved several colors behind
+	 * selectors that outrank the ones this test can discover from the target
+	 * platform, most visibly the editor area stack (addressed by id) and view
+	 * bodies tagged {@code .View}. They are pinned here so the overlay keeps
+	 * working on a newer IDE than the one the plugin is compiled against.
+	 */
+	private static final List<String> SELECTORS_ADDED_AFTER_THE_BUILD_TARGET = List.of(
+			"ColorDefinition#org-eclipse-ui-workbench-SECONDARY_BACKGROUND",
+			"#org-eclipse-ui-editorss CTabFolder",
+			"#org-eclipse-ui-editorss CTabItem",
+			"#org-eclipse-ui-editorss CTabItem:selected",
+			"#org-eclipse-e4-ui-compatibility-editor Canvas",
+			"#org-eclipse-e4-ui-compatibility-editor Composite",
+			".MPartStack.active",
+			".MPartStack CTabFolder[style~='SWT.DOWN'][style~='SWT.BOTTOM']",
+			".MPartStack.active Table",
+			".MPart CTabFolder",
+			".MPart Form Label",
+			".MPart Form Section",
+			".MPartStack.active .MPart Form Label",
+			"#org-eclipse-help-ui-HelpView Form",
+			".View Composite",
+			".View Composite Text",
+			".View Group Combo",
+			".View Button[style~='SWT.PUSH']",
+			".View TitleRegion",
+			"Composite.MArea",
+			"Button.disabled",
+			"Combo:selected",
+			".MTrimBar#org-eclipse-ui-trim-status");
+
+	@Test
+	void overlayAlsoCoversSelectorsFromNewerEclipseReleases() {
+		Map<String, Set<String>> overlay = CssRules.declarations(WorkbenchCssGenerator.generate(theme()));
+		List<String> missing = new ArrayList<>();
+
+		for (String selector : SELECTORS_ADDED_AFTER_THE_BUILD_TARGET) {
+			if (!overlay.containsKey(selector)) {
+				missing.add(selector);
+			}
+		}
+
+		assertTrue(missing.isEmpty(), "Selectors from newer Eclipse releases that the overlay does not replace:\n"
+				+ String.join("\n", missing));
+	}
+
 	@Test
 	void overlayDoesNotReplaceTheColorDefinitionRegistration() {
 		// A ThemesExtension rule of ours would win over Eclipse's and drop every

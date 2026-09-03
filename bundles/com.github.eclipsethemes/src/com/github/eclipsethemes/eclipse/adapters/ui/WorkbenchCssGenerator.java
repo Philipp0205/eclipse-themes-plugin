@@ -42,8 +42,9 @@ public final class WorkbenchCssGenerator {
 		colors.put("disabled", palette.disabled());
 		colors.put("link", palette.link());
 		colors.put("selectionBackground", palette.selectionBackground());
+		colors.put("selectionForeground", palette.selectionForeground());
 
-		String css = TEMPLATE;
+		String css = TEMPLATE + RECENT_RELEASES_TEMPLATE;
 		for (Map.Entry<String, String> color : colors.entrySet()) {
 			css = css.replace("${" + color.getKey() + "}", color.getValue());
 		}
@@ -395,6 +396,178 @@ public final class WorkbenchCssGenerator {
 			.MPartStack.active > Composite,
 			.MPartStack.active.noFocus > Composite { background-color: ${background}; }
 			.ModifiedDragFeedback { background-color: ${selectionBackground}; }
+			""";
+
+	/**
+	 * Selectors that Eclipse releases after the 2024-09 build target introduced.
+	 * They are inert on older platforms because nothing matches them, so they are
+	 * emitted unconditionally instead of probing the running platform version.
+	 */
+	private static final String RECENT_RELEASES_TEMPLATE = """
+
+			/* ===== Selectors added after the 2024-09 build target ===== */
+
+			/* Newer releases route view bodies, the tab area and the trim through
+			 * this definition instead of literal colors.
+			 */
+			ColorDefinition#org-eclipse-ui-workbench-SECONDARY_BACKGROUND { color: ${background}; }
+			.MTrimBar#org-eclipse-ui-trim-status { background-color: ${chrome}; }
+			Composite.MArea { background-color: ${chrome}; }
+			.MPart CTabFolder { swt-outer-keyline-color: ${border}; }
+
+			Button.disabled { color: ${disabled}; }
+			Button[style~='SWT.CHECK'], Button[style~='SWT.RADIO'] { color: ${foreground}; }
+			Combo:selected {
+			    background-color: ${selectionBackground};
+			    color: ${selectionForeground};
+			}
+
+			/* The editor area stack is addressed by id, which outranks every class selector. */
+			#org-eclipse-ui-editorss CTabItem {
+			    background-color: ${chrome};
+			    color: ${muted};
+			}
+			#org-eclipse-ui-editorss CTabItem:selected {
+			    background-color: ${background};
+			    color: ${foreground};
+			}
+			#org-eclipse-ui-editorss CTabFolder {
+			    swt-selected-tab-fill: ${background};
+			    swt-selected-tab-highlight: ${link};
+			    swt-unselected-hot-tab-color-background: ${hover};
+			    swt-tab-outline: ${border};
+			    swt-tab-outer-keyline: ${border};
+			}
+			#org-eclipse-ui-editorss CTabFolder.active { swt-selected-tab-highlight: ${link}; }
+			#org-eclipse-e4-ui-compatibility-editor Canvas,
+			#org-eclipse-e4-ui-compatibility-editor Canvas > *,
+			#org-eclipse-e4-ui-compatibility-editor Composite {
+			    background-color: ${background};
+			}
+
+			.MPartStack {
+			    swt-selected-tab-highlight: ${muted};
+			    swt-unselected-hot-tab-color-background: ${hover};
+			}
+			.MPartStack.active { swt-selected-tab-highlight: ${link}; }
+			.MPartStack CTabFolder[style~='SWT.DOWN'][style~='SWT.BOTTOM'],
+			.MPartStack.active CTabFolder[style~='SWT.DOWN'][style~='SWT.BOTTOM'] {
+			    swt-selected-tab-highlight: ${link};
+			    swt-unselected-hot-tab-color-background: ${hover};
+			}
+			.MPartStack.active Table {
+			    background-color: ${background};
+			    color: ${foreground};
+			}
+
+			/* Views tagged .View rather than .MPart. */
+			.View Composite,
+			.View Composite Tree,
+			.View Composite Label,
+			.View ToolBar,
+			.View Toolbar ToolItem,
+			.View Group,
+			.View Group Label,
+			.View Section,
+			.View BusyIndicator,
+			.View Text[style~='SWT.READ_ONLY'],
+			.View StyledText[style~='SWT.READ_ONLY'],
+			.View SashForm,
+			.View OleFrame,
+			.View Browser,
+			.View WebSite,
+			.View Link,
+			.View FormText,
+			.View Canvas,
+			.View FigureCanvas,
+			.View Button[style~='SWT.CHECK'],
+			.View Composite PrependingAsteriskFilteredTree {
+			    background-color: ${background};
+			    color: ${foreground};
+			}
+			.View Composite Text,
+			.View Group Text,
+			.View Group Combo,
+			.View PrependingAsteriskFilteredTree Text {
+			    background-color: ${input};
+			    color: ${foreground};
+			}
+			.View Button[style~='SWT.PUSH'] {
+			    background-color: ${chrome};
+			    color: ${foreground};
+			}
+			.View Hyperlink {
+			    background-color: ${background};
+			    color: ${link};
+			}
+			.View TabbedPropertyList { swt-tabBackground-color: ${chrome}; }
+			.View TitleRegion,
+			.MPartStack.active .View TitleRegion {
+			    background-color: ${elevated};
+			    color: ${foreground};
+			}
+
+			/* Forms inside parts, restyled per part-stack focus state. */
+			.MPart Form Section,
+			.MPart Form Section Tree,
+			.MPart Form Label,
+			.MPart Form FormText,
+			.MPart Form Group,
+			.MPart Form Link,
+			.MPart Form Button,
+			.MPart Form Button[style~='SWT.CHECK'],
+			.MPart Form Button[style~='SWT.RADIO'],
+			.MPart Form Text[style~='SWT.READ_ONLY'],
+			.MPart Form ScrolledPageBook,
+			.MPart Form ListEditorComposite,
+			.MPart Form DependenciesComposite,
+			.MPart Form DependenciesComposite > SashForm > Section > *,
+			.MPartStack .MPart Form Sash,
+			.MPartStack .MPart Form SashForm,
+			.MPartStack .MPart Form MasterDetailsBlock-MDSashForm,
+			.MPartStack.active .MPart Form,
+			.MPartStack.active .MPart Form Section,
+			.MPartStack.active .MPart Form Section Tree,
+			.MPartStack.active .MPart Form Label,
+			.MPartStack.active .MPart Form FormText,
+			.MPartStack.active .MPart Form Group,
+			.MPartStack.active .MPart Form Link,
+			.MPartStack.active .MPart Form Button,
+			.MPartStack.active .MPart Form Button[style~='SWT.CHECK'],
+			.MPartStack.active .MPart Form Button[style~='SWT.RADIO'],
+			.MPartStack.active .MPart Form Text[style~='SWT.READ_ONLY'],
+			.MPartStack.active .MPart Form ScrolledPageBook,
+			.MPartStack.active .MPart Form ListEditorComposite,
+			.MPartStack.active .MPart Form DependenciesComposite,
+			.MPartStack.active .MPart Form DependenciesComposite > SashForm > Section > *,
+			.MPartStack.active .MPart Form Sash,
+			.MPartStack.active .MPart Form SashForm,
+			.MPartStack.active .MPart Form MasterDetailsBlock-MDSashForm {
+			    background-color: ${background};
+			    color: ${foreground};
+			}
+
+			#org-eclipse-help-ui-HelpView Form,
+			#org-eclipse-help-ui-HelpView Form Section,
+			#org-eclipse-help-ui-HelpView Form Label,
+			#org-eclipse-help-ui-HelpView Form FormText,
+			#org-eclipse-help-ui-HelpView Form Group,
+			#org-eclipse-help-ui-HelpView Form Button,
+			#org-eclipse-help-ui-HelpView Form Sash,
+			#org-eclipse-help-ui-HelpView Form ScrolledPageBook,
+			#org-eclipse-help-ui-HelpView Form Text[style~='SWT.READ_ONLY'],
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form Section,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form Label,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form FormText,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form Group,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form Button,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form Sash,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form ScrolledPageBook,
+			.MPartStack.active #org-eclipse-help-ui-HelpView Form Text[style~='SWT.READ_ONLY'] {
+			    background-color: ${background};
+			    color: ${foreground};
+			}
 			""";
 	// @formatter:on
 }
