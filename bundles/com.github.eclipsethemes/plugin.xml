@@ -9,6 +9,11 @@
             class="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
             id="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
             name="Eclipse Themes"></page>
+		<page
+			category="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
+			class="com.github.eclipsethemes.eclipse.preferences.ThemeColorPreferencePage"
+			id="com.github.eclipsethemes.eclipse.preferences.ThemeColorPreferencePage"
+			name="Colors"></page>
 	</extension>
 	<extension
          point="org.eclipse.core.runtime.preferences">

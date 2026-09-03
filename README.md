@@ -21,6 +21,7 @@ I then realized the old plugin was also outdated, so I decided to build this one
 - **Import support** for your own favorite `.xml` theme files.
 - Syntax highlighting support for Java, C++, XML, and more via an adapter system.
 - Optional whole-workbench styling for views, tabs, toolbars, trees, and tables.
+- A **Colors** preference page, modeled on Java syntax highlighting, for every theme token.
 - An application-only GTK overlay on Linux for native backgrounds and selections.
 
 ## 📸 Screenshots
@@ -48,7 +49,8 @@ I then realized the old plugin was also outdated, so I decided to build this one
 2.  Navigate to `General -> Appearance -> Eclipse Themes`.
 3.  Pick a theme from the list to see how it looks.
 4.  Leave **Apply theme to the whole Eclipse workbench** selected to also style the IDE chrome.
-5.  Click **Apply and Close** to set your new theme.
+5.  Open **Colors** under Eclipse Themes to change any token—editor, syntax, workbench, and GTK—using a Java-style element list, color picker, and bold/italic/underline/strikethrough flags.
+6.  Click **Apply and Close** to set your theme and custom colors.
 
 ### Platform styling limits
 

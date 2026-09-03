@@ -16,10 +16,6 @@ public final class ThemeStartup implements IStartup {
 	@Override
 	public void earlyStartup() {
 		var preferences = InstanceScope.INSTANCE.getNode(EclipseThemes.PLUGIN_ID);
-		if (!preferences.getBoolean(PreferenceKeys.APPLY_WORKBENCH_THEME, true)) {
-			return;
-		}
-
 		String themeId = preferences.get(PreferenceKeys.ACTIVE_THEME_ID, null);
 		if (themeId == null || themeId.isBlank()) {
 			return;

@@ -98,6 +98,29 @@ public final class TokenKey {
 		return name;
 	}
 
+	public String getDisplayName() {
+		String spaced = name.replaceAll("([a-z])([A-Z])", "$1 $2").replace('_', ' ');
+		String[] words = spaced.split(" ");
+		StringBuilder label = new StringBuilder();
+		for (String word : words) {
+			if (word.isEmpty()) {
+				continue;
+			}
+			if (label.length() > 0) {
+				label.append(' ');
+			}
+			if ("xml".equalsIgnoreCase(word) || "cpp".equalsIgnoreCase(word)) {
+				label.append(word.toUpperCase());
+			} else {
+				label.append(Character.toUpperCase(word.charAt(0)));
+				if (word.length() > 1) {
+					label.append(word.substring(1));
+				}
+			}
+		}
+		return label.toString();
+	}
+
 	public TokenKey getInheritsFrom() {
 		return inheritsFrom;
 	}
