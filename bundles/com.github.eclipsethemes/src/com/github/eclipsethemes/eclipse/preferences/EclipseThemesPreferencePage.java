@@ -63,6 +63,8 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	private Button removeButton;
 	private Button previewToggleButton;
 	private Button applyWorkbenchThemeButton;
+	private Button applyEclipseCssModernizationButton;
+	private Button applyGtkModernizationButton;
 	private Label statusLabel;
 
 	// Data
@@ -72,6 +74,8 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	private Theme currentTheme;
 	private boolean previewVisible = true;
 	private boolean initialApplyWorkbenchTheme;
+	private boolean initialApplyEclipseCssModernization;
+	private boolean initialApplyGtkModernization;
 
 	public EclipseThemesPreferencePage() {
 		ScopedPreferenceStore scopedPreferenceStore = new ScopedPreferenceStore(InstanceScope.INSTANCE,
@@ -118,6 +122,26 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		applyWorkbenchThemeButton.setText("Apply theme to the whole Eclipse workbench");
 		applyWorkbenchThemeButton.setToolTipText(
 				"Styles views, tabs, toolbars, trees and tables in addition to editors");
+
+		Composite modernizationOptions = new Composite(options, SWT.NONE);
+		GridLayout modernizationLayout = new GridLayout(1, false);
+		modernizationLayout.marginWidth = 20;
+		modernizationLayout.marginHeight = 0;
+		modernizationOptions.setLayout(modernizationLayout);
+		modernizationOptions.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+
+		applyEclipseCssModernizationButton = new Button(modernizationOptions, SWT.CHECK);
+		applyEclipseCssModernizationButton.setText("Enable Eclipse CSS modernization");
+		applyEclipseCssModernizationButton.setToolTipText(
+				"Applies the generated Eclipse workbench CSS layer for modernized tabs, views and controls");
+
+		applyGtkModernizationButton = new Button(modernizationOptions, SWT.CHECK);
+		applyGtkModernizationButton.setText("Enable GTK modernization (Linux only)");
+		applyGtkModernizationButton
+				.setToolTipText("Applies a GTK overlay for native widgets such as menus, tooltips and text controls");
+		if (!Platform.WS_GTK.equals(Platform.getWS())) {
+			applyGtkModernizationButton.setEnabled(false);
+		}
 
 		Link colorsLink = new Link(options, SWT.NONE);
 		colorsLink.setText(
@@ -347,7 +371,13 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		this.currentTheme = findThemeById(activeThemeId).orElse(null);
 		this.initialApplyWorkbenchTheme = getPreferenceStore()
 				.getBoolean(PreferenceKeys.APPLY_WORKBENCH_THEME);
+		this.initialApplyEclipseCssModernization = getPreferenceStore()
+				.getBoolean(PreferenceKeys.ENABLE_ECLIPSE_CSS_MODERNIZATION);
+		this.initialApplyGtkModernization = getPreferenceStore().getBoolean(PreferenceKeys.ENABLE_GTK_MODERNIZATION);
 		applyWorkbenchThemeButton.setSelection(initialApplyWorkbenchTheme);
+		applyEclipseCssModernizationButton.setSelection(initialApplyEclipseCssModernization);
+		applyGtkModernizationButton.setSelection(initialApplyGtkModernization);
+		updateModernizationToggleState();
 
 		refreshThemeList();
 		selectInitialTheme();
@@ -445,6 +475,13 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				filterThemes();
+			}
+		});
+
+		applyWorkbenchThemeButton.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				updateModernizationToggleState();
 			}
 		});
 
@@ -575,6 +612,14 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		}
 	}
 
+	private void updateModernizationToggleState() {
+		boolean workbenchEnabled = applyWorkbenchThemeButton.getSelection();
+		applyEclipseCssModernizationButton.setEnabled(workbenchEnabled);
+		if (Platform.WS_GTK.equals(Platform.getWS())) {
+			applyGtkModernizationButton.setEnabled(workbenchEnabled);
+		}
+	}
+
 	private void applySelectedTheme() {
 		if (selectedTheme == null) {
 			return;
@@ -584,10 +629,16 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 			getPreferenceStore().setValue(PreferenceKeys.ACTIVE_THEME_ID, selectedTheme.getId());
 			getPreferenceStore().setValue(PreferenceKeys.APPLY_WORKBENCH_THEME,
 					applyWorkbenchThemeButton.getSelection());
+			getPreferenceStore().setValue(PreferenceKeys.ENABLE_ECLIPSE_CSS_MODERNIZATION,
+					applyEclipseCssModernizationButton.getSelection());
+			getPreferenceStore().setValue(PreferenceKeys.ENABLE_GTK_MODERNIZATION,
+					applyGtkModernizationButton.getSelection());
 			EclipseThemes.instance().getManager().applyTheme(workbench, selectedTheme);
 
 			currentTheme = selectedTheme;
 			initialApplyWorkbenchTheme = applyWorkbenchThemeButton.getSelection();
+			initialApplyEclipseCssModernization = applyEclipseCssModernizationButton.getSelection();
+			initialApplyGtkModernization = applyGtkModernizationButton.getSelection();
 			updateButtonStates();
 			refreshThemeList(); // to update "●" indicator
 
@@ -755,7 +806,14 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 	public boolean performOk() {
 		boolean workbenchPreferenceChanged =
 				applyWorkbenchThemeButton.getSelection() != initialApplyWorkbenchTheme;
-		if (selectedTheme != null && (!selectedTheme.equals(currentTheme) || workbenchPreferenceChanged)) {
+		boolean eclipseCssModernizationChanged =
+				applyEclipseCssModernizationButton.getSelection() != initialApplyEclipseCssModernization;
+		boolean gtkModernizationChanged =
+				applyGtkModernizationButton.getSelection() != initialApplyGtkModernization;
+		if (selectedTheme != null && (!selectedTheme.equals(currentTheme)
+				|| workbenchPreferenceChanged
+				|| eclipseCssModernizationChanged
+				|| gtkModernizationChanged)) {
 			applySelectedTheme();
 		}
 		return super.performOk();
@@ -777,7 +835,11 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 
 	private void resetToPluginDefault() {
 		applyWorkbenchThemeButton.setSelection(true);
+		applyEclipseCssModernizationButton.setSelection(true);
+		applyGtkModernizationButton.setSelection(true);
 		getPreferenceStore().setValue(PreferenceKeys.APPLY_WORKBENCH_THEME, true);
+		getPreferenceStore().setValue(PreferenceKeys.ENABLE_ECLIPSE_CSS_MODERNIZATION, true);
+		getPreferenceStore().setValue(PreferenceKeys.ENABLE_GTK_MODERNIZATION, true);
 		Theme defaultTheme = getDefaultThemeForCurrentMode();
 		if (defaultTheme != null) {
 			getPreferenceStore().setValue(PreferenceKeys.ACTIVE_THEME_ID, defaultTheme.getId());
@@ -787,6 +849,10 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 			getPreferenceStore().setToDefault(PreferenceKeys.ACTIVE_THEME_ID);
 			currentTheme = null;
 		}
+		initialApplyWorkbenchTheme = true;
+		initialApplyEclipseCssModernization = true;
+		initialApplyGtkModernization = true;
+		updateModernizationToggleState();
 		refreshThemeList();
 		if (currentTheme != null) {
 			themeViewer.setSelection(new StructuredSelection(currentTheme));
@@ -809,8 +875,15 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		}
 		getPreferenceStore().setToDefault(PreferenceKeys.ACTIVE_THEME_ID);
 		getPreferenceStore().setValue(PreferenceKeys.APPLY_WORKBENCH_THEME, false);
+		getPreferenceStore().setValue(PreferenceKeys.ENABLE_ECLIPSE_CSS_MODERNIZATION, false);
+		getPreferenceStore().setValue(PreferenceKeys.ENABLE_GTK_MODERNIZATION, false);
 		applyWorkbenchThemeButton.setSelection(false);
+		applyEclipseCssModernizationButton.setSelection(false);
+		applyGtkModernizationButton.setSelection(false);
 		initialApplyWorkbenchTheme = false;
+		initialApplyEclipseCssModernization = false;
+		initialApplyGtkModernization = false;
+		updateModernizationToggleState();
 		currentTheme = null;
 		refreshThemeList();
 		clearSelection();

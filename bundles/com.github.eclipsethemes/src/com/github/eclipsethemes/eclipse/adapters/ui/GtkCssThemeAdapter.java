@@ -38,6 +38,7 @@ public final class GtkCssThemeAdapter extends EclipseThemeAdapter {
 			throws BackingStoreException {
 		if (!Platform.WS_GTK.equals(Platform.getWS())
 				|| !preferences.getBoolean(PreferenceKeys.APPLY_WORKBENCH_THEME, true)
+				|| !preferences.getBoolean(PreferenceKeys.ENABLE_GTK_MODERNIZATION, true)
 				|| workbench == null) {
 			return;
 		}

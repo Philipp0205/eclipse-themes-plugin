@@ -54,7 +54,9 @@ public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 	@Override
 	public void applyWorkbench(Theme theme, IEclipsePreferences preferences, IWorkbench workbench)
 			throws BackingStoreException {
-		if (!preferences.getBoolean(PreferenceKeys.APPLY_WORKBENCH_THEME, true) || workbench == null) {
+		if (!preferences.getBoolean(PreferenceKeys.APPLY_WORKBENCH_THEME, true)
+				|| !preferences.getBoolean(PreferenceKeys.ENABLE_ECLIPSE_CSS_MODERNIZATION, true)
+				|| workbench == null) {
 			return;
 		}
 
