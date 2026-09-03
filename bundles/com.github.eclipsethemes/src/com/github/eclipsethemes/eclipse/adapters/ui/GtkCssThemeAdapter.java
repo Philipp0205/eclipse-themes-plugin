@@ -14,6 +14,7 @@ import org.osgi.service.prefs.BackingStoreException;
 import com.github.eclipsethemes.EclipseThemes;
 import com.github.eclipsethemes.core.models.Theme;
 import com.github.eclipsethemes.eclipse.adapters.EclipseThemeAdapter;
+import com.github.eclipsethemes.eclipse.preferences.AppearanceSettings;
 import com.github.eclipsethemes.eclipse.preferences.PreferenceKeys;
 
 public final class GtkCssThemeAdapter extends EclipseThemeAdapter {
@@ -42,7 +43,7 @@ public final class GtkCssThemeAdapter extends EclipseThemeAdapter {
 			return;
 		}
 
-		String css = GtkCssGenerator.generate(theme);
+		String css = GtkCssGenerator.generate(theme, AppearanceSettings.of(preferences));
 		Path cssFile;
 		try {
 			Path generated = EclipseThemes.getPluginDataDirectory().toPath().resolve("generated");
