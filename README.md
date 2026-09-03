@@ -43,6 +43,16 @@ I then realized the old plugin was also outdated, so I decided to build this one
 2.  Click **Add...** and enter the URL: `https://ahatem.github.io/eclipse-themes-plugin/`
 3.  Give it a name (like `Eclipse Themes`) and complete the installation.
 
+### From a locally built update site
+
+Useful for trying out an unreleased branch.
+
+1.  Run `mvn clean verify`. The p2 repository is written to
+    `releng/com.github.eclipsethemes.updatesite/target/com.github.eclipsethemes.updatesite-*.zip`.
+2.  Go to `Help -> Install New Software...`, click **Add...**, then **Archive...**
+    and pick that zip.
+3.  Select **Eclipse Themes** and complete the installation.
+
 ## 💻 Usage
 
 1.  Go to `Window -> Preferences` (or `Eclipse -> Settings...` on macOS).
