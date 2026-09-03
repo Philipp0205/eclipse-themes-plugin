@@ -61,6 +61,26 @@ class CssGeneratorTest {
 	}
 
 	@Test
+	void gtkCssRaisesPushButtonsAndKeepsToolbarButtonsFlat() {
+		WorkbenchPalette palette = WorkbenchPalette.of(darkDimmed());
+		String css = GtkCssGenerator.generate(darkDimmed());
+
+		// Chrome is darker than the surface, so a button filled with it reads as a
+		// hole rather than a raised control.
+		assertTrue(css.contains("button {\n    background-color: " + palette.elevated() + ";"));
+		assertTrue(css.contains("toolbar button, toolbar togglebutton, headerbar button, "
+				+ "notebook button, button.flat {\n    background-color: transparent;"));
+	}
+
+	@Test
+	void workbenchCssThemesTheTeamDecorationColors() {
+		String css = WorkbenchCssGenerator.generate(darkDimmed());
+
+		assertTrue(css.contains("ColorDefinition#org-eclipse-egit-ui-UncommittedChangeBackgroundColor"));
+		assertTrue(css.contains("ColorDefinition#org-eclipse-egit-ui-IgnoredResourceBackgroundColor"));
+	}
+
+	@Test
 	void gtkCssOnlyUsesColorsDerivedFromTheTheme() {
 		WorkbenchPalette palette = WorkbenchPalette.of(darkDimmed());
 		String css = GtkCssGenerator.generate(darkDimmed());

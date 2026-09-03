@@ -86,14 +86,17 @@ public final class GtkCssGenerator {
 			    color: ${selectionForeground};
 			}
 
-			button, headerbar button, combobox button {
-			    background-color: ${chrome};
+			/* Push buttons sit slightly above the surface. Using the darker chrome
+			 * color here makes them read as holes punched into the dialog.
+			 */
+			button {
+			    background-color: ${elevated};
 			    background-image: none;
 			    color: ${foreground};
 			    border-color: ${border};
 			}
 
-			button:hover, button:focus {
+			button:hover {
 			    background-color: ${hover};
 			    background-image: none;
 			    color: ${foreground};
@@ -103,6 +106,37 @@ public final class GtkCssGenerator {
 			    background-color: ${selectionBackground};
 			    background-image: none;
 			    color: ${selectionForeground};
+			}
+
+			button:disabled {
+			    background-color: ${background};
+			    background-image: none;
+			    color: ${disabled};
+			}
+
+			button:focus {
+			    outline-color: ${link};
+			}
+
+			/* Toolbars, headers and tab bars paint their own surface, so the buttons
+			 * on them stay flat until hovered.
+			 */
+			toolbar button, toolbar togglebutton, headerbar button, notebook button, button.flat {
+			    background-color: transparent;
+			    background-image: none;
+			    border-color: transparent;
+			}
+
+			toolbar button:hover, toolbar togglebutton:hover, headerbar button:hover,
+			notebook button:hover, button.flat:hover {
+			    background-color: ${hover};
+			    background-image: none;
+			}
+
+			combobox button, combobox button:hover, spinbutton button {
+			    background-color: ${input};
+			    background-image: none;
+			    color: ${foreground};
 			}
 
 			menubar, menu, .menu, .context-menu, popover, popover.background, .popup {

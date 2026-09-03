@@ -547,6 +547,15 @@ public final class WorkbenchCssGenerator {
 			    color: ${foreground};
 			}
 
+			/* Team decorations. EGit paints resource rows with these definitions and
+			 * defaults them to the SWT system list colors, which SWT caches from the
+			 * desktop GTK theme before any of this is applied.
+			 */
+			ColorDefinition#org-eclipse-egit-ui-UncommittedChangeBackgroundColor { color: ${background}; }
+			ColorDefinition#org-eclipse-egit-ui-UncommittedChangeForegroundColor { color: ${foreground}; }
+			ColorDefinition#org-eclipse-egit-ui-IgnoredResourceBackgroundColor { color: ${background}; }
+			ColorDefinition#org-eclipse-egit-ui-IgnoredResourceForegroundColor { color: ${disabled}; }
+
 			#org-eclipse-help-ui-HelpView Form,
 			#org-eclipse-help-ui-HelpView Form Section,
 			#org-eclipse-help-ui-HelpView Form Label,
