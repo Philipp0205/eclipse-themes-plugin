@@ -90,7 +90,8 @@ final class CssRules {
 	static Set<String> paletteColors(WorkbenchPalette palette) {
 		return new LinkedHashSet<>(List.of(palette.background(), palette.foreground(), palette.chrome(),
 				palette.elevated(), palette.hover(), palette.input(), palette.border(), palette.muted(),
-				palette.disabled(), palette.link(), palette.selectionBackground(), palette.selectionForeground()));
+				palette.disabled(), palette.link(), palette.listSelection(), palette.separator(),
+				palette.selectionBackground(), palette.selectionForeground()));
 	}
 
 	/** Reads a stylesheet shipped by {@code org.eclipse.ui.themes}. */

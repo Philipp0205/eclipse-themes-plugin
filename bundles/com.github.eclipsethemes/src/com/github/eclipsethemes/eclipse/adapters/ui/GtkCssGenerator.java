@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.github.eclipsethemes.core.models.Theme;
+import com.github.eclipsethemes.eclipse.preferences.AppearanceSettings;
 
 /**
  * Generates the GTK stylesheet that covers what Eclipse CSS cannot reach.
@@ -22,6 +23,10 @@ public final class GtkCssGenerator {
 	}
 
 	public static String generate(Theme theme) {
+		return generate(theme, AppearanceSettings.defaults());
+	}
+
+	public static String generate(Theme theme, AppearanceSettings settings) {
 		WorkbenchPalette palette = WorkbenchPalette.of(theme);
 
 		Map<String, String> colors = new LinkedHashMap<>();
@@ -35,14 +40,46 @@ public final class GtkCssGenerator {
 		colors.put("muted", palette.muted());
 		colors.put("disabled", palette.disabled());
 		colors.put("link", palette.link());
+		colors.put("listSelection", palette.listSelection());
+		colors.put("separator", palette.separator());
 		colors.put("selectionBackground", palette.selectionBackground());
 		colors.put("selectionForeground", palette.selectionForeground());
 
-		String css = TEMPLATE;
+		String css = TEMPLATE + refinements(settings);
 		for (Map.Entry<String, String> color : colors.entrySet()) {
 			css = css.replace("${" + color.getKey() + "}", color.getValue());
 		}
 		return css;
+	}
+
+	/**
+	 * Overrides appended after {@link #TEMPLATE}. GTK resolves conflicts by
+	 * specificity first and by source order second, so every block below either
+	 * repeats a base selector verbatim or narrows it, and needs no {@code
+	 * !important}.
+	 */
+	private static String refinements(AppearanceSettings settings) {
+		StringBuilder css = new StringBuilder();
+		if (settings.flatToolbarButtons()) {
+			css.append(FLAT_TOOLBAR_BUTTONS);
+		}
+		if (settings.modernScrollbars()) {
+			css.append(MODERN_SCROLLBARS);
+		}
+		if (settings.roundedControls()) {
+			css.append(ROUNDED_CONTROLS);
+		}
+		if (settings.dimSeparators()) {
+			css.append(DIM_SEPARATORS);
+		}
+		if (settings.accentListSelection()) {
+			css.append(ACCENT_LIST_SELECTION);
+		}
+		// Last, so the accent ring survives the border colors set above.
+		if (settings.solidFocusRings()) {
+			css.append(SOLID_FOCUS_RINGS);
+		}
+		return css.toString();
 	}
 
 	// @formatter:off
@@ -136,22 +173,6 @@ public final class GtkCssGenerator {
 
 			button:focus {
 			    outline-color: ${link};
-			}
-
-			/* Toolbars, headers and tab bars paint their own surface, so the buttons
-			 * on them stay flat until hovered.
-			 */
-			toolbar button, toolbar togglebutton, headerbar button, notebook button, button.flat {
-			    background-color: transparent;
-			    background-image: none;
-			    border-color: transparent;
-			    box-shadow: none;
-			}
-
-			toolbar button:hover, toolbar togglebutton:hover, headerbar button:hover,
-			notebook button:hover, button.flat:hover {
-			    background-color: ${hover};
-			    background-image: none;
 			}
 
 			combobox button, combobox button:hover, spinbutton button {
@@ -249,6 +270,142 @@ public final class GtkCssGenerator {
 			    background-color: ${selectionBackground};
 			    color: ${selectionForeground};
 			}
+			""";
+
+	/**
+	 * Toolbars, headers and tab bars paint their own surface, so the buttons on
+	 * them stay flat until hovered.
+	 *
+	 * <p>
+	 * SWT renders every {@code ToolItem} as a GTK {@code button}, and desktop
+	 * themes keep those flat by painting the 1px border transparent rather than
+	 * by removing it. The generic {@code button} rule in the template would
+	 * otherwise draw a box around every toolbar icon.
+	 * </p>
+	 */
+	private static final String FLAT_TOOLBAR_BUTTONS = """
+
+			/* ===== Flat toolbar buttons ===== */
+			toolbar button, toolbar togglebutton, headerbar button, notebook button, button.flat {
+			    background-color: transparent;
+			    background-image: none;
+			    border-color: transparent;
+			    box-shadow: none;
+			    border-radius: 5px;
+			    padding: 3px;
+			}
+
+			toolbar button:hover, toolbar togglebutton:hover, headerbar button:hover,
+			notebook button:hover, button.flat:hover {
+			    background-color: ${hover};
+			    background-image: none;
+			    border-color: transparent;
+			}
+
+			toolbar button:checked, toolbar togglebutton:checked, button.flat:checked {
+			    background-color: ${selectionBackground};
+			    color: ${selectionForeground};
+			    border-color: transparent;
+			}
+
+			/* The generic disabled fill would show as a lighter block on the trim. */
+			toolbar button:disabled, toolbar togglebutton:disabled, button.flat:disabled {
+			    background-color: transparent;
+			    border-color: transparent;
+			    color: ${disabled};
+			}
+			""";
+
+	/** Thumb floating over the content instead of a filled, bordered trough. */
+	private static final String MODERN_SCROLLBARS = """
+
+			/* ===== Overlay scrollbars ===== */
+			scrollbar, scrollbar trough {
+			    background-color: transparent;
+			    background-image: none;
+			    border: none;
+			}
+
+			scrollbar slider {
+			    background-color: ${border};
+			    border: 4px solid transparent;
+			    border-radius: 10px;
+			    background-clip: padding-box;
+			    min-width: 8px;
+			    min-height: 8px;
+			}
+
+			scrollbar slider:hover { background-color: ${muted}; }
+			scrollbar slider:active { background-color: ${foreground}; }
+			""";
+
+	private static final String ROUNDED_CONTROLS = """
+
+			/* ===== Rounded controls ===== */
+			entry, spinbutton, textview, .entry, button, combobox button {
+			    border-radius: 6px;
+			}
+
+			check { border-radius: 3px; }
+
+			menu, .menu, .context-menu, popover, popover.background, .popup {
+			    border-radius: 8px;
+			    padding: 4px;
+			}
+
+			menuitem {
+			    border-radius: 4px;
+			    min-height: 22px;
+			}
+
+			menubar > menuitem { border-radius: 4px; }
+
+			tooltip, tooltip.background { border-radius: 6px; }
+			""";
+
+	private static final String DIM_SEPARATORS = """
+
+			/* ===== Toolbar separators ===== */
+			toolbar separator, .inline-toolbar separator {
+			    background-color: ${separator};
+			    color: ${separator};
+			    margin-top: 5px;
+			    margin-bottom: 5px;
+			}
+			""";
+
+	/**
+	 * The template paints rows with the editor's text-selection color, which is
+	 * chosen to sit behind syntax highlighting rather than behind a full row of
+	 * plain text.
+	 */
+	private static final String ACCENT_LIST_SELECTION = """
+
+			/* ===== List and tree selection ===== */
+			treeview.view:selected, treeview.view:selected:focus,
+			list row:selected, list row:selected:focus, list:selected, iconview:selected {
+			    background-color: ${listSelection};
+			    color: ${foreground};
+			}
+			""";
+
+	/** GTK's default focus indicator is a dashed rectangle. */
+	private static final String SOLID_FOCUS_RINGS = """
+
+			/* ===== Focus rings ===== */
+			* {
+			    outline-color: ${link};
+			    outline-style: solid;
+			    outline-width: 1px;
+			    outline-offset: -2px;
+			}
+
+			entry:focus, spinbutton:focus, textview:focus {
+			    border-color: ${link};
+			    box-shadow: none;
+			}
+
+			button:focus, toolbar button:focus { outline-offset: -3px; }
 			""";
 	// @formatter:on
 }

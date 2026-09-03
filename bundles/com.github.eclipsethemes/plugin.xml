@@ -9,6 +9,9 @@
 		<keyword
 			id="com.github.eclipsethemes.keywords.colors"
 			label="eclipse themes colors syntax coloring highlighting keyword token workbench"/>
+		<keyword
+			id="com.github.eclipsethemes.keywords.appearance"
+			label="eclipse themes appearance chrome toolbar buttons outline border scrollbar focus ring rounded corners tabs separators selection"/>
 	</extension>
 	<extension
          point="org.eclipse.ui.preferencePages">
@@ -25,6 +28,13 @@
 			id="com.github.eclipsethemes.eclipse.preferences.ThemeColorPreferencePage"
 			name="Colors">
 			<keywordReference id="com.github.eclipsethemes.keywords.colors"/>
+		</page>
+		<page
+			category="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
+			class="com.github.eclipsethemes.eclipse.preferences.AppearancePreferencePage"
+			id="com.github.eclipsethemes.eclipse.preferences.AppearancePreferencePage"
+			name="Appearance">
+			<keywordReference id="com.github.eclipsethemes.keywords.appearance"/>
 		</page>
 	</extension>
 	<extension

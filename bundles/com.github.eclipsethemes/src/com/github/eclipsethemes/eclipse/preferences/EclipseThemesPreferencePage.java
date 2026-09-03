@@ -133,6 +133,20 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 			}
 		});
 
+		Link appearanceLink = new Link(options, SWT.NONE);
+		appearanceLink.setText(
+				"Choose how far the <a>workbench chrome is restyled</a>: toolbar buttons, scrollbars, focus rings and tabs.");
+		appearanceLink.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		appearanceLink.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (getContainer() instanceof IWorkbenchPreferenceContainer container) {
+					container.openPage("com.github.eclipsethemes.eclipse.preferences.AppearancePreferencePage",
+							null);
+				}
+			}
+		});
+
 		if (Platform.WS_GTK.equals(Platform.getWS())) {
 			Label gtkNote = new Label(options, SWT.WRAP);
 			gtkNote.setText(

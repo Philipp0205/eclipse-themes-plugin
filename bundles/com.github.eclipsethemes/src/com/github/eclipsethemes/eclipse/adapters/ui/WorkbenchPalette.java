@@ -29,6 +29,8 @@ final class WorkbenchPalette {
 	private final Color muted;
 	private final Color disabled;
 	private final Color link;
+	private final Color listSelection;
+	private final Color separator;
 	private final boolean dark;
 
 	private WorkbenchPalette(Theme theme) {
@@ -46,6 +48,8 @@ final class WorkbenchPalette {
 		muted = mix(foreground, background, 0.32);
 		disabled = mix(foreground, background, 0.55);
 		link = accent(theme);
+		listSelection = mix(background, link, dark ? 0.30 : 0.22);
+		separator = mix(border, chrome, 0.55);
 	}
 
 	static WorkbenchPalette of(Theme theme) {
@@ -99,6 +103,21 @@ final class WorkbenchPalette {
 
 	String link() {
 		return link.toString();
+	}
+
+	/**
+	 * Row highlight for trees, tables and lists. Tinting the background towards
+	 * the accent keeps it distinct from {@link #selectionBackground()}, which is
+	 * tuned to sit behind syntax colors in the editor rather than behind a full
+	 * row of plain text.
+	 */
+	String listSelection() {
+		return listSelection.toString();
+	}
+
+	/** Hairline between toolbar groups, quieter than a control border. */
+	String separator() {
+		return separator.toString();
 	}
 
 	String selectionBackground() {

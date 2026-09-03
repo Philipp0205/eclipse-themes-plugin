@@ -21,6 +21,7 @@ import com.github.eclipsethemes.EclipseThemes;
 import com.github.eclipsethemes.core.models.Theme;
 import com.github.eclipsethemes.core.models.ThemeType;
 import com.github.eclipsethemes.eclipse.adapters.EclipseThemeAdapter;
+import com.github.eclipsethemes.eclipse.preferences.AppearanceSettings;
 import com.github.eclipsethemes.eclipse.preferences.PreferenceKeys;
 
 public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
@@ -63,7 +64,8 @@ public final class WorkbenchCssThemeAdapter extends EclipseThemeAdapter {
 			Path generated = EclipseThemes.getPluginDataDirectory().toPath().resolve("generated");
 			Files.createDirectories(generated);
 			cssFile = generated.resolve("workbench-overlay.css");
-			Files.writeString(cssFile, WorkbenchCssGenerator.generate(theme), StandardCharsets.UTF_8);
+			Files.writeString(cssFile, WorkbenchCssGenerator.generate(theme, AppearanceSettings.of(preferences)),
+					StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			throw new IllegalStateException("Could not write the workbench CSS overlay", e);
 		}

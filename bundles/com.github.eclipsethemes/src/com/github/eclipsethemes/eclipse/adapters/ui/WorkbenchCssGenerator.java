@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.github.eclipsethemes.core.models.Theme;
+import com.github.eclipsethemes.eclipse.preferences.AppearanceSettings;
 
 /**
  * Generates the overlay applied after Eclipse's platform-specific base theme.
@@ -28,6 +29,10 @@ public final class WorkbenchCssGenerator {
 	}
 
 	public static String generate(Theme theme) {
+		return generate(theme, AppearanceSettings.defaults());
+	}
+
+	public static String generate(Theme theme, AppearanceSettings settings) {
 		WorkbenchPalette palette = WorkbenchPalette.of(theme);
 
 		Map<String, String> colors = new LinkedHashMap<>();
@@ -44,11 +49,30 @@ public final class WorkbenchCssGenerator {
 		colors.put("selectionBackground", palette.selectionBackground());
 		colors.put("selectionForeground", palette.selectionForeground());
 
-		String css = TEMPLATE + RECENT_RELEASES_TEMPLATE;
+		String css = TEMPLATE + RECENT_RELEASES_TEMPLATE + tabRefinements(settings);
 		for (Map.Entry<String, String> color : colors.entrySet()) {
 			css = css.replace("${" + color.getKey() + "}", color.getValue());
 		}
 		return css;
+	}
+
+	/**
+	 * Tab chrome the e4 engine exposes through {@code CTabFolder} properties.
+	 * Appended last so these win the stylesheet-order tie against the equally
+	 * specific rules above.
+	 */
+	private static String tabRefinements(AppearanceSettings settings) {
+		StringBuilder css = new StringBuilder();
+		if (settings.squareTabs()) {
+			css.append(SQUARE_TABS);
+		}
+		if (settings.closeButtonOnActiveTabOnly()) {
+			css.append(CLOSE_ON_ACTIVE_TAB_ONLY);
+		}
+		if (settings.hideTabMinimizeMaximize()) {
+			css.append(HIDE_TAB_MINIMIZE_MAXIMIZE);
+		}
+		return css.toString();
 	}
 
 	// @formatter:off
@@ -452,7 +476,7 @@ public final class WorkbenchCssGenerator {
 			    swt-selected-tab-highlight: ${link};
 			    swt-unselected-hot-tab-color-background: ${hover};
 			    swt-tab-outline: ${border};
-			    swt-tab-outer-keyline: ${border};
+			    swt-outer-keyline-color: ${border};
 			}
 			#org-eclipse-ui-editorss CTabFolder.active { swt-selected-tab-highlight: ${link}; }
 			#org-eclipse-e4-ui-compatibility-editor Canvas,
@@ -592,6 +616,42 @@ public final class WorkbenchCssGenerator {
 			.MPartStack.active #org-eclipse-help-ui-HelpView Form Text[style~='SWT.READ_ONLY'] {
 			    background-color: ${background};
 			    color: ${foreground};
+			}
+			""";
+
+	/**
+	 * {@code CTabRendering#setCornerRadius} rounds anything below 6 down to a
+	 * square tab, so 0 is the documented way to ask for square corners. The
+	 * keylines are folded into the tab area color as well, because together they
+	 * draw the box that frames the whole tab strip.
+	 */
+	private static final String SQUARE_TABS = """
+
+			/* ===== Square tabs ===== */
+			CTabFolder, CTabFolder.MArea, .MPartStack, #org-eclipse-ui-editorss CTabFolder {
+			    swt-corner-radius: 0;
+			}
+			#org-eclipse-ui-editorss CTabFolder {
+			    swt-tab-outline: ${chrome};
+			    swt-outer-keyline-color: ${chrome};
+			    swt-inner-keyline-color: ${chrome};
+			}
+			""";
+
+	private static final String CLOSE_ON_ACTIVE_TAB_ONLY = """
+
+			/* ===== Close button on the active tab only ===== */
+			CTabFolder, .MPartStack, #org-eclipse-ui-editorss CTabFolder {
+			    swt-unselected-close-visible: false;
+			}
+			""";
+
+	private static final String HIDE_TAB_MINIMIZE_MAXIMIZE = """
+
+			/* ===== Hide the stack minimize and maximize buttons ===== */
+			CTabFolder, CTabFolder.MArea, .MPartStack {
+			    swt-maximize-visible: false;
+			    swt-minimize-visible: false;
 			}
 			""";
 	// @formatter:on
