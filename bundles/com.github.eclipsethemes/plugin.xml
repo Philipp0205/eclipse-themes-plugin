@@ -2,18 +2,30 @@
 <?eclipse version="3.4"?>
 <plugin>
 	<extension-point id="com.github.eclipsethemes.theme.adapters" name="Theme Adapter" schema="schema/com.github.eclipsethemes.theme.adapters.exsd"/>
+	<extension point="org.eclipse.ui.keywords">
+		<keyword
+			id="com.github.eclipsethemes.keywords.themes"
+			label="eclipse themes colors syntax highlighting workbench gtk"/>
+		<keyword
+			id="com.github.eclipsethemes.keywords.colors"
+			label="eclipse themes colors syntax coloring highlighting keyword token workbench"/>
+	</extension>
 	<extension
          point="org.eclipse.ui.preferencePages">
 		<page
 			category="org.eclipse.ui.preferencePages.Views"
             class="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
             id="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
-            name="Eclipse Themes"></page>
+            name="Eclipse Themes">
+			<keywordReference id="com.github.eclipsethemes.keywords.themes"/>
+		</page>
 		<page
 			category="com.github.eclipsethemes.eclipse.preferences.EclipseThemesPreferencePage"
 			class="com.github.eclipsethemes.eclipse.preferences.ThemeColorPreferencePage"
 			id="com.github.eclipsethemes.eclipse.preferences.ThemeColorPreferencePage"
-			name="Colors"></page>
+			name="Colors">
+			<keywordReference id="com.github.eclipsethemes.keywords.colors"/>
+		</page>
 	</extension>
 	<extension
          point="org.eclipse.core.runtime.preferences">

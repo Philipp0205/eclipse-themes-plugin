@@ -28,6 +28,26 @@ class ColorCustomizationStoreTest {
 	}
 
 	@Test
+	void catalogListsEveryRegisteredToken() {
+		java.util.Set<TokenKey> catalogued = ColorElementCatalog.categories().stream()
+				.flatMap(category -> category.keys().stream())
+				.collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+		java.util.Set<TokenKey> registered = java.util.Arrays.stream(TokenKey.class.getDeclaredFields())
+				.filter(field -> java.lang.reflect.Modifier.isStatic(field.getModifiers())
+						&& field.getType() == TokenKey.class)
+				.map(field -> {
+					try {
+						return (TokenKey) field.get(null);
+					} catch (IllegalAccessException e) {
+						throw new IllegalStateException(e);
+					}
+				})
+				.collect(java.util.stream.Collectors.toCollection(java.util.LinkedHashSet::new));
+
+		assertEquals(registered, catalogued);
+	}
+
+	@Test
 	void displayNameIsReadable() {
 		assertEquals("Selection Background", TokenKey.SELECTION_BACKGROUND.getDisplayName());
 		assertEquals("XML Tag", TokenKey.XML_TAG.getDisplayName());

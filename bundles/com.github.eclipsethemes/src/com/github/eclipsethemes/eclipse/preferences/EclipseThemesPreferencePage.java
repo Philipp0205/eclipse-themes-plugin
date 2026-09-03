@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.preferences.ScopedPreferenceStore;
 
 import com.github.eclipsethemes.EclipseThemes;
@@ -117,6 +118,20 @@ public class EclipseThemesPreferencePage extends PreferencePage implements IWork
 		applyWorkbenchThemeButton.setText("Apply theme to the whole Eclipse workbench");
 		applyWorkbenchThemeButton.setToolTipText(
 				"Styles views, tabs, toolbars, trees and tables in addition to editors");
+
+		Link colorsLink = new Link(options, SWT.NONE);
+		colorsLink.setText(
+				"Fine-tune <a>colors and styles for every theme element</a> like Java syntax highlighting.");
+		colorsLink.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		colorsLink.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				if (getContainer() instanceof IWorkbenchPreferenceContainer container) {
+					container.openPage("com.github.eclipsethemes.eclipse.preferences.ThemeColorPreferencePage",
+							null);
+				}
+			}
+		});
 
 		if (Platform.WS_GTK.equals(Platform.getWS())) {
 			Label gtkNote = new Label(options, SWT.WRAP);
