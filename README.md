@@ -1,6 +1,6 @@
 # Eclipse Themes
 
-[![Build Status](https://github.com/ahatem/eclipse-themes-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/ahatem/eclipse-themes-plugin/actions)
+[![Build Status](https://github.com/Philipp0205/eclipse-themes-plugin/actions/workflows/build.yml/badge.svg)](https://github.com/Philipp0205/eclipse-themes-plugin/actions)
 ![Eclipse Marketplace License](https://img.shields.io/eclipse-marketplace/l/eclipse-themes?color=brightgreen)
 ![Eclipse Marketplace Last Update](https://img.shields.io/eclipse-marketplace/v/eclipse-themes)
 ![Eclipse Marketplace Downloads](https://img.shields.io/eclipse-marketplace/dt/eclipse-themes)
@@ -31,22 +31,31 @@ I then realized the old plugin was also outdated, so I decided to build this one
 
 ## 🚀 Installation
 
-### From the Eclipse Marketplace (Recommended)
+### From the Update Site (Recommended)
+
+1.  Go to `Help -> Install New Software...`.
+2.  Click **Add...** and enter the URL: `https://philipp0205.github.io/eclipse-themes-plugin/`
+3.  Give it a name (like `Eclipse Themes`) and complete the installation.
+
+This update site is built from this repository and carries its changes. The
+upstream project publishes a separate site at
+`https://ahatem.github.io/eclipse-themes-plugin/`, which does not include them.
+
+The `Build and Deploy` workflow rebuilds the p2 repository and republishes it to
+GitHub Pages on every push to `main` or to the repository's default branch, so a
+fork serves its own update site. It needs
+`Settings -> Pages -> Build and deployment -> Source` set to **GitHub Actions**;
+with the default **Deploy from a branch** source, Pages renders this README
+instead of the p2 repository and Eclipse cannot install from the URL.
+
+### From the Eclipse Marketplace
+
+The Marketplace entry is published by the upstream project, so it ships upstream
+releases rather than the changes in this repository.
 
 1.  Go to `Help -> Eclipse Marketplace...`.
 2.  Search for `Eclipse Themes`.
 3.  Click **Install**.
-
-### From the Update Site
-
-1.  Go to `Help -> Install New Software...`.
-2.  Click **Add...** and enter the URL: `https://ahatem.github.io/eclipse-themes-plugin/`
-3.  Give it a name (like `Eclipse Themes`) and complete the installation.
-
-The `Build and Deploy` workflow rebuilds the p2 repository and republishes it to
-GitHub Pages on every push to `main` or to the repository's default branch, so a
-fork serves its own update site — for example
-`https://philipp0205.github.io/eclipse-themes-plugin/`.
 
 ### From a locally built update site
 
